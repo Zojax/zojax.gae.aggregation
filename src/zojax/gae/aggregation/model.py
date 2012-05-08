@@ -2,6 +2,7 @@
 
 ## HACK FOR ndb
 import sys
+import base64
 try:
     import ndb
 except ImportError:  # pragma: no cover
@@ -35,7 +36,6 @@ class AggregatedProperty(object):
         return 0
 
     def __set__(self, instance, value):
-        #import logging; logging.info("__set__ !!!!!!!!!!!!! %s " % str(instance))
         Aggregation.set_aggregation(instance.key, self.name, value)
 
 
@@ -53,7 +53,10 @@ def sum_add(instance, field, aggregator_instance, aggregator_field, process_func
         process_func = lambda x:x
 
     ndb.get_context().clear_cache()
-    old_instance = instance.key.get()
+    if instance.key.id():
+        old_instance = instance.key.get()
+    else:
+        old_instance = None
     sum_part = process_func(getattr(instance, field))
     if old_instance:
         if process_func(getattr(old_instance, field)) != sum_part:
@@ -116,36 +119,9 @@ class Aggregation(model.Model):
     """
     Aggregation
     """
-    key = model.KeyProperty('k', required=True)
+    refkey = model.KeyProperty('k', required=True)
     field = model.StringProperty('f', required=True)
     value = model.FloatProperty('v', default=0)
-
-#    @classmethod
-#    def get_or_create_aggregation(cls, key, field_name):
-#        """
-#        Retrieves aggregation object by provided key and field name. When fist time called,
-#        new aggregation will be created.
-#        """
-#        #field = '%s|%s' % (field_name, aggregation_type)
-#        cachekey = str(hash(field_name + str(key)))
-#        aggregation = memcache.get(cachekey)
-#        if not aggregation:
-#            aggregation = cls.query(cls.key == key, cls.field==field_name).get()
-#            if not aggregation:
-#                # Need to execute it in the task
-#                taskqueue.add(url=uri_for("aggregation_worker"),
-#                    params={'index': index,
-#                            'action': action,
-#                            'application': application,
-#                            'target_index': target_index
-#                    })
-#                ##
-#                aggregation = cls(key=key, field=field_name)
-#                aggregation.put()
-#
-#            memcache.add(key=cachekey, value=aggregation)
-#
-#        return aggregation
 
     @classmethod
     def get_aggregation(cls, key, field_name):
@@ -157,7 +133,7 @@ class Aggregation(model.Model):
         cachekey = str(hash(field_name + str(key)))
         aggregation = memcache.get(cachekey)
         if not aggregation:
-            aggregation = cls.query(cls.key == key, cls.field==field_name).get()
+            aggregation = cls.query(cls.refkey == key, cls.field==field_name, ancestor=key).get()
             if aggregation is not None:
                 memcache.add(key=cachekey, value=aggregation)
 
@@ -170,8 +146,8 @@ class Aggregation(model.Model):
         """
         # Need to execute in task
         taskqueue.add(url=uri_for("aggregation_worker"),
-                      #transactional=True,
-                      params={'key': key,
+                      transactional=True,
+                      params={'key': key.urlsafe(),
                               'field_name': field_name,
                               'value': value
                              })
