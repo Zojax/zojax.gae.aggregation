@@ -39,7 +39,7 @@ class AggregationWorker(BaseHandler):
         key = ndb.Key(urlsafe=self.request.get('key'))
         field_name = self.request.get('field_name')
         value = float(self.request.get('value'))
-        uuid = float(self.request.get('uuid'))
+        uuid = self.request.get('uuid')
 
         duplicated = memcache.get(uuid)
         if duplicated:
@@ -56,4 +56,4 @@ class AggregationWorker(BaseHandler):
 
         cachekey = str(hash(field_name + str(key)))
         memcache.set(cachekey, aggregation)
-        memcache.delete(uuid)
+        #memcache.delete(uuid)
