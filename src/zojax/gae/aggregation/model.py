@@ -126,10 +126,8 @@ class Aggregation(model.Model):
     @classmethod
     def get_aggregation(cls, key, field_name):
         """
-        Retrieves aggregation object by provided key and field name. When fist time called,
-        new aggregation will be created.
+        Retrieves aggregation object by provided key and field name.
         """
-        #field = '%s|%s' % (field_name, aggregation_type)
         cachekey = str(hash(field_name + str(key)))
         aggregation = memcache.get(cachekey)
         if not aggregation:
@@ -149,20 +147,7 @@ class Aggregation(model.Model):
                       transactional=True,
                       params={'key': key.urlsafe(),
                               'field_name': field_name,
-                              'value': value
+                              'value': value,
+                              'uuid': uuid.uuid4()
                              })
-
-
-
-#    @property
-#    def aggregation_type(self):
-#        field_name, aggregation = self.field.split("|")
-#
-#        return aggregation
-
-#    @property
-#    def field_name(self):
-#        field_name, aggregation = self.field.split("|")
-#
-#        return field_name
 
