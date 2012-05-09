@@ -1,11 +1,17 @@
 # -*- coding: utf-8 -*-
 
 import os
-import webapp2, ndb
+import webapp2
 import logging
 
+try:
+    import ndb
+except ImportError: # pragma: no cover
+    from google.appengine.ext import ndb
+
+
 from google.appengine.api import memcache, taskqueue
-from ndb import Key
+#from ndb import Key
 
 from zojax.gae.aggregation.model import Aggregation
 
@@ -29,7 +35,7 @@ class BaseHandler(webapp2.RequestHandler):
 class AggregationWorker(BaseHandler):
 
     def post(self):
-        key = Key(urlsafe=self.request.get('key'))
+        key = ndb.Key(urlsafe=self.request.get('key'))
         field_name = self.request.get('field_name')
         value = float(self.request.get('value'))
 
