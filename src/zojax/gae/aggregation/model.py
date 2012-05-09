@@ -145,7 +145,7 @@ class Aggregation(model.Model):
         Updates aggregation object by provided key and field name.
         """
         # Need to execute in task
-        taskqueue.add(url=uri_for("aggregation_worker"),
+        taskqueue.add(url='/_ah/aggregation/tasks/worker/',#uri_for("aggregation_worker"),
                       transactional=True,
                       params={'key': key.urlsafe(),
                               'field_name': field_name,
