@@ -1,4 +1,4 @@
-"""Testing gae.aggregation."""
+# -*- coding: utf-8 -*-
 
 import re
 import os
@@ -27,12 +27,9 @@ from webapp2 import WSGIApplication
 from webtest import TestApp
 
 
-#from .. import migrate
-#from ..migrate import read_migrations, register_migrations, get_migration_dirs
 from . import handlers
 from .routes import routes
 from model import AggregatedProperty, sum_add, Aggregation, sum_sub, count_inc, count_dec
-#from . import model
 
 
 app = WSGIApplication()
@@ -55,7 +52,7 @@ class Comment(model.Model):
     body = model.StringProperty()
     rating = model.FloatProperty()
     created = model.DateTimeProperty(auto_now=True)
-    #average
+
     def _pre_put_hook(self):
         process_data = lambda x: x if x and x>0 else 0
         sum_add(self, "rating", self.article.get(), 'total_rating', process_data)

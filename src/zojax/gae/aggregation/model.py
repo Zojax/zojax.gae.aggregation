@@ -39,6 +39,25 @@ class AggregatedProperty(object):
     def __set__(self, instance, value):
         Aggregation.set_aggregation(instance.key, self.name, value)
 
+def check_max(instance, field, aggregator_instance, aggregator_field, action="add"):
+    """
+    Shortcut function for adding sum operation. Requires next arguments:
+        * instance - instance of aggregated model;
+        * field - name of field the sum is calculated by;
+        * aggregator_instance - instance of the model the aggregation created for;
+        * aggregator_field - name of the field of aggregator_instance which is AggregatedProperty;
+        * action - action type on aggregator instance; by default is add, otherwise is interpreted as delete
+
+    """
+    current_max = getattr(instance, field)
+    contender = getattr(aggregator_instance, aggregator_field)
+    if action == "add":
+        if contender > current_max:
+            setattr(aggregator_instance, aggregator_field, contender)
+        return
+    #if contender == current_max:
+
+
 
 def sum_add(instance, field, aggregator_instance, aggregator_field, process_func=None):
     """
