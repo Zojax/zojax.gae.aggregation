@@ -55,7 +55,11 @@ def check_max(instance, field, aggregator_instance, aggregator_field, action="ad
         if contender > current_max:
             setattr(aggregator_instance, aggregator_field, contender)
         return
-    #if contender == current_max:
+    if contender == current_max and action != "add":
+        # need to exclude current aggregator_instance
+        max_instance = aggregator_instance.query().order(-getattr(aggregator_instance.__class__,
+                                                                  aggregator_field)).fetch(limit=1)
+        setattr(aggregator_instance, aggregator_field, getattr(max_instance, aggregator_field))
 
 
 
