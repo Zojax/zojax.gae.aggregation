@@ -3,6 +3,7 @@
 ## HACK FOR ndb
 import sys
 import base64
+import uuid
 try:
     import ndb
 except ImportError:  # pragma: no cover
@@ -143,7 +144,7 @@ class Aggregation(model.Model):
         Updates aggregation object by provided key and field name.
         """
         # Need to execute in task
-        taskqueue.add(url='/_ah/aggregation/tasks/worker/',#uri_for("aggregation_worker"),
+        taskqueue.add(url=uri_for("aggregation_worker"),#'/_ah/aggregation/tasks/worker/',#
                       transactional=True,
                       params={'key': key.urlsafe(),
                               'field_name': field_name,

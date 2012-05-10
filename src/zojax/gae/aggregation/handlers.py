@@ -35,7 +35,7 @@ class BaseHandler(webapp2.RequestHandler):
 class AggregationWorker(BaseHandler):
 
     def post(self):
-        #import pdb; pdb.set_trace()
+#        import nose; nose.tools.set_trace()
         key = ndb.Key(urlsafe=self.request.get('key'))
         field_name = self.request.get('field_name')
         value = float(self.request.get('value'))
@@ -44,8 +44,8 @@ class AggregationWorker(BaseHandler):
         duplicated = memcache.get(uuid)
         if duplicated:
             return
-        else:
-            memcache.set(uuid, 1)
+
+        memcache.set(uuid, 1, time=3600*24)
 
         aggregation = Aggregation.get_aggregation(key, field_name)
         if not aggregation:
