@@ -38,7 +38,7 @@ Here is an example of aggregations use case: We have Article it's Comments. We n
 for each article. An example of code will look like this::
 
     from ndb import model
-    from zojax.gae.model import sum_add, sum_sub, count_inc, count_dec
+    from zojax.gae.aggregation import AggregatedProperty, sum_add, sum_sub, count_inc, count_dec
 
     class Article(model.Model):
         content = model.StringProperty()

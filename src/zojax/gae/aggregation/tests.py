@@ -28,8 +28,9 @@ from webtest import TestApp
 
 
 from . import handlers
+from .utils import AggregatedProperty, sum_add, sum_sub, count_inc, count_dec
 from .routes import routes
-from model import AggregatedProperty, sum_add, Aggregation, sum_sub, count_inc, count_dec
+from model import Aggregation
 
 
 app = WSGIApplication()
@@ -45,6 +46,8 @@ class Article(model.Model):
     created = model.DateTimeProperty(auto_now=True)
     comments_count = AggregatedProperty("article_comment_count")
     total_rating = AggregatedProperty("article_rating_sum")
+    max_rating = AggregatedProperty("rating_max")
+    min_rating = AggregatedProperty("rating_min")
 
 
 class Comment(model.Model):
@@ -52,11 +55,13 @@ class Comment(model.Model):
     body = model.StringProperty()
     rating = model.FloatProperty()
     created = model.DateTimeProperty(auto_now=True)
+#    parent = Article()
 
     def _pre_put_hook(self):
         process_data = lambda x: x if x and x>0 else 0
         sum_add(self, "rating", self.article.get(), 'total_rating', process_data)
         count_inc(self, self.article.get(), 'comments_count')
+        #check_max(self, "rating", self.article.get(), 'max_rating', lambda x: x)
 
     @classmethod
     def _pre_delete_hook(cls, key):
@@ -64,6 +69,7 @@ class Comment(model.Model):
         process_data = lambda x: x if x and x>0 else 0
         sum_sub(instance, "rating", instance.article.get(), 'total_rating', process_data)
         count_dec(instance, instance.article.get(), 'comments_count')
+        #check_max(instance, "rating", instance.article.get(), 'max_rating', lambda x: x, action="delete")
 
 
 class BaseTestCase(TestCase):
@@ -239,7 +245,4 @@ class AggregationTestCase(BaseTestCase):
         taskqueue.add(**task_kwargs)
         self.submit_deferred()
         self.assertEqual(article.total_rating, total_sum)
-
-
-
 
