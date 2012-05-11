@@ -30,7 +30,7 @@ from webtest import TestApp
 from . import handlers
 from .utils import AggregatedProperty, sum_add, sum_sub, count_inc, count_dec
 from .routes import routes
-from model import Aggregation
+from .model import Aggregation
 
 
 app = WSGIApplication()
